@@ -1,6 +1,5 @@
 import {
   Action,
-  AnyAction,
   configureStore,
   PayloadAction,
   ThunkAction,

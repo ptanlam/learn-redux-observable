@@ -1,18 +1,33 @@
-import { PayloadAction } from '@reduxjs/toolkit';
 import { ofType } from 'redux-observable';
-import { Observable, map, mergeMap } from 'rxjs';
-import { ajax } from 'rxjs/ajax';
-import { FetchUserPayload, userActions } from './userSlice';
+import {
+  catchError,
+  debounce,
+  map,
+  mergeMap,
+  Observable,
+  of,
+  timer,
+} from 'rxjs';
+import { ajax, AjaxError } from 'rxjs/ajax';
 import { User } from './models/user.model';
+import { FetchUserAction, userActions } from './userSlice';
 
-export const fetchUserEpic = (
-  action$: Observable<PayloadAction<FetchUserPayload>>
-) =>
+export const fetchUserEpic = (action$: Observable<FetchUserAction>) =>
   action$.pipe(
     ofType(userActions.fetch.type),
+    debounce(() => timer(400)),
     mergeMap((action) =>
       ajax
         .getJSON<User>(`https://api.github.com/users/${action.payload.login}`)
-        .pipe(map((response) => userActions.fetchFulfilled(response)))
+        .pipe(
+          map((response) => userActions.fetchFulfilled(response)),
+          catchError((error: AjaxError) => {
+            return of({
+              type: userActions.fetchRejected.type,
+              payload: error.xhr.response,
+              error: true,
+            });
+          })
+        )
     )
   );
