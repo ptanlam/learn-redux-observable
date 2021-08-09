@@ -6,6 +6,7 @@ import {
   mergeMap,
   Observable,
   of,
+  takeUntil,
   timer,
 } from 'rxjs';
 import { ajax, AjaxError } from 'rxjs/ajax';
@@ -21,6 +22,7 @@ export const fetchUserEpic = (action$: Observable<FetchUserAction>) =>
         .getJSON<User>(`https://api.github.com/users/${action.payload.login}`)
         .pipe(
           map((response) => userActions.fetchFulfilled(response)),
+          takeUntil(action$.pipe(ofType(userActions.cancelFetch.type))),
           catchError((error: AjaxError) => {
             return of({
               type: userActions.fetchRejected.type,

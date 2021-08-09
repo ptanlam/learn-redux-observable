@@ -21,6 +21,10 @@ function App() {
     dispatch(userActions.fetch({ login: username }));
   }, [username, dispatch]);
 
+  const onCancelClick = () => {
+    dispatch(userActions.cancelFetch());
+  };
+
   return (
     <div
       className="App"
@@ -38,6 +42,8 @@ function App() {
         onChange={(e) => setUsername(e.currentTarget.value)}
         value={username}
       />
+
+      <button onClick={onCancelClick}>Cancel</button>
 
       {userFetching ? (
         <p>loading...</p>

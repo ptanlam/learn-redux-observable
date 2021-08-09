@@ -33,6 +33,9 @@ const userSlice = createSlice({
       state.fetching = false;
       state.errorMessage = action.payload.message;
     },
+    cancelFetch(state) {
+      state.fetching = false;
+    },
   },
 });
 
