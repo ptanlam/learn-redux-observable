@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import './App.css';
 import { useAppDispatch, useAppSelector } from './app/hooks';
+import { User } from './features/user/models/user.model';
 import {
   userActions,
   userFetchSelector,
+  userLisSelector,
   userProfileSelector,
 } from './features/user/userSlice';
 
@@ -12,8 +14,9 @@ function App() {
 
   const dispatch = useAppDispatch();
 
-  const userFetching = useAppSelector(userFetchSelector);
+  const fetching = useAppSelector(userFetchSelector);
   const userProfile = useAppSelector(userProfileSelector);
+  const userList = useAppSelector(userLisSelector);
   const errorMessage = useAppSelector((state) => state.user.errorMessage);
 
   useEffect(() => {
@@ -24,6 +27,18 @@ function App() {
   const onCancelClick = () => {
     dispatch(userActions.cancelFetch());
   };
+
+  const renderUser = (user: User) => (
+    <>
+      <img
+        src={user.avatar_url}
+        alt={user.login}
+        width={200}
+        style={{ borderRadius: '50%' }}
+      />
+      <pre>{JSON.stringify(user, undefined, 2)}</pre>
+    </>
+  );
 
   return (
     <div
@@ -43,20 +58,21 @@ function App() {
         value={username}
       />
 
-      <button onClick={onCancelClick}>Cancel</button>
+      <div>
+        <button onClick={() => dispatch(userActions.fetchList())}>
+          Get List
+        </button>
+      </div>
 
-      {userFetching ? (
-        <p>loading...</p>
-      ) : (
-        <>
-          <img
-            src={userProfile.avatar_url}
-            alt={userProfile.login}
-            width={200}
-          />
-          <pre>{JSON.stringify(userProfile, undefined, 2)}</pre>
-        </>
-      )}
+      <div>
+        <button onClick={onCancelClick}>Cancel</button>
+      </div>
+
+      {fetching && <p>loading...</p>}
+
+      {userList.length && userList.map((user) => renderUser(user))}
+
+      {Object.keys(userProfile) && renderUser(userProfile)}
 
       {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
     </div>

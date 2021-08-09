@@ -1,3 +1,4 @@
+import { PayloadAction } from '@reduxjs/toolkit';
 import { ofType } from 'redux-observable';
 import {
   catchError,
@@ -31,5 +32,23 @@ export const fetchUserEpic = (action$: Observable<FetchUserAction>) =>
             });
           })
         )
+    )
+  );
+
+export const fetchListEpic = (action$: Observable<PayloadAction>) =>
+  action$.pipe(
+    ofType(userActions.fetchList.type),
+    mergeMap((action) =>
+      ajax.getJSON<User[]>('https://api.github.com/users').pipe(
+        map((response) => userActions.fetchListFulfilled(response)),
+        takeUntil(action$.pipe(ofType(userActions.cancelFetch.type))),
+        catchError((error: AjaxError) => {
+          return of({
+            type: userActions.fetchRejected.type,
+            payload: error.xhr.response,
+            error: true,
+          });
+        })
+      )
     )
   );
