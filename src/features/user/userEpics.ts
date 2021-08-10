@@ -1,5 +1,6 @@
-import { PayloadAction } from '@reduxjs/toolkit';
-import { ofType } from 'redux-observable';
+import { Action, PayloadAction } from '@reduxjs/toolkit';
+import { RootStateOrAny } from 'react-redux';
+import { ofType, StateObservable } from 'redux-observable';
 import {
   catchError,
   debounceTime,
@@ -9,36 +10,46 @@ import {
   of,
   takeUntil,
 } from 'rxjs';
-import { ajax, AjaxError } from 'rxjs/ajax';
-import { User } from './models/user.model';
+import { AjaxError } from 'rxjs/ajax';
+import { UserApi } from '../../apis/userApi';
 import { FetchUserAction, userActions } from './userSlice';
 
-export const fetchUserEpic = (action$: Observable<FetchUserAction>) =>
+interface Props {
+  userApi: UserApi;
+}
+
+export const fetchUserEpic = (
+  action$: Observable<FetchUserAction>,
+  _state$: StateObservable<RootStateOrAny> | null,
+  { userApi }: Props
+) =>
   action$.pipe(
     ofType(userActions.fetch.type),
     debounceTime(400),
     mergeMap((action) =>
-      ajax
-        .getJSON<User>(`https://api.github.com/users/${action.payload.login}`)
-        .pipe(
-          map((response) => userActions.fetchFulfilled(response)),
-          takeUntil(action$.pipe(ofType(userActions.cancelFetch.type))),
-          catchError((error: AjaxError) => {
-            return of({
-              type: userActions.fetchRejected.type,
-              payload: error.xhr.response,
-              error: true,
-            });
-          })
-        )
+      userApi.getUserByName(action.payload.login).pipe(
+        map((response) => userActions.fetchFulfilled(response)),
+        takeUntil(action$.pipe(ofType(userActions.cancelFetch.type))),
+        catchError((error: AjaxError) => {
+          return of({
+            type: userActions.fetchRejected.type,
+            payload: error.xhr.response,
+            error: true,
+          });
+        })
+      )
     )
   );
 
-export const fetchListEpic = (action$: Observable<PayloadAction>) =>
+export const fetchListEpic = (
+  action$: Observable<Action>,
+  _state$: StateObservable<RootStateOrAny> | null,
+  { userApi }: Props
+) =>
   action$.pipe(
     ofType(userActions.fetchList.type),
-    mergeMap((action) =>
-      ajax.getJSON<User[]>('https://api.github.com/users').pipe(
+    mergeMap(() =>
+      userApi.getUserList().pipe(
         map((response) => userActions.fetchListFulfilled(response)),
         takeUntil(action$.pipe(ofType(userActions.cancelFetch.type))),
         catchError((error: AjaxError) => {

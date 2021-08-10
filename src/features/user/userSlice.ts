@@ -17,7 +17,7 @@ const initialState: UserState = {
   list: [],
 };
 
-export type FetchUserAction = PayloadAction<{ login?: string }>;
+export type FetchUserAction = PayloadAction<{ login: string }>;
 
 const userSlice = createSlice({
   name: 'user',
