@@ -53,11 +53,14 @@ const userSlice = createSlice({
   },
 });
 
+// Actions
 export const userActions = userSlice.actions;
 
+// Selectors
 export const userProfileSelector = (state: RootState) => state.user.profile;
 export const userFetchSelector = (state: RootState) => state.user.fetching;
 export const userLisSelector = (state: RootState) => state.user.list;
 
+// Reducer
 const userReducer = userSlice.reducer;
 export default userReducer;

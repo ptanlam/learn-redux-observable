@@ -2,13 +2,12 @@ import { PayloadAction } from '@reduxjs/toolkit';
 import { ofType } from 'redux-observable';
 import {
   catchError,
-  debounce,
+  debounceTime,
   map,
   mergeMap,
   Observable,
   of,
   takeUntil,
-  timer,
 } from 'rxjs';
 import { ajax, AjaxError } from 'rxjs/ajax';
 import { User } from './models/user.model';
@@ -17,7 +16,7 @@ import { FetchUserAction, userActions } from './userSlice';
 export const fetchUserEpic = (action$: Observable<FetchUserAction>) =>
   action$.pipe(
     ofType(userActions.fetch.type),
-    debounce(() => timer(400)),
+    debounceTime(400),
     mergeMap((action) =>
       ajax
         .getJSON<User>(`https://api.github.com/users/${action.payload.login}`)

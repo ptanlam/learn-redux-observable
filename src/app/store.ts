@@ -8,7 +8,7 @@ import { createEpicMiddleware } from 'redux-observable';
 import { rootEpic } from './rootEpic';
 import { rootReducer } from './rootReducer';
 
-const epicMiddleware = createEpicMiddleware<PayloadAction<any>>();
+const epicMiddleware = createEpicMiddleware<PayloadAction>();
 
 export const store = configureStore({
   reducer: rootReducer,
