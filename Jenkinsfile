@@ -1,5 +1,7 @@
 pipeline {
-  agent any
+  agent {
+    docker 'circleci/node:9.3-stretch-browsers'
+  }
   stages {
     stage('Verify Branch') {
       steps {
