@@ -8,12 +8,12 @@ pipeline {
     }
     stage('Docker Build') {
       steps {
-        echo "hi"
-        // pwsh(script: """
-        //   docker images -a
-        //   docker build -t jenkins-pipeline .
-        //   docker images -a
-        // """)
+        pwsh(script: 'docker images -a')
+        pwsh(script: """
+          docker images -a
+          docker build -t jenkins-pipeline .
+          docker images -a
+        """)
       }
     }
   }
